@@ -1,4 +1,7 @@
 import argparse
+import sys
+sys.path.insert(0, '/net/galaxy/home/koes/skothare/Estats/dl_model/evaluate_proteinshake_V2')
+from metrics import regression_metrics
 
 parser = argparse.ArgumentParser()
 parser.add_argument('task', metavar='TASK', choices=[
@@ -23,6 +26,9 @@ parser.add_argument('--test', metavar='PATH', default=None,
                     help='evaluate a trained model')
 parser.add_argument('--lr', metavar='RATE', default=1e-4, type=float,
                     help='learning rate')
+# Added a --seed argument and save the best checkpoint to a predictable named path at the end of train() - SK 25Jun2026.
+parser.add_argument('--seed', metavar='N', type=int, default=42,
+                    help='random seed for reproducibility, default=42')
 parser.add_argument('--load', metavar='PATH', default=None, 
                     help='initialize first 2 GNN layers with pretrained weights')
 
@@ -47,6 +53,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model_id = float(time.time())
 
 def main():
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
     datasets = get_datasets(args.task, args.lba_split)
     dataloader = partial(torch_geometric.data.DataLoader, 
                     num_workers=args.num_workers, batch_size=args.batch)
@@ -81,31 +89,54 @@ def test(model, testset):
             targets.extend(list(label.cpu().numpy()))
             predicts.extend(list(pred.cpu().numpy()))
 
-    for name, func in metrics.items():
-        if args.task in ['PSR', 'RSR']:
-            func = partial(func, ids=ids)
-        value = func(targets, predicts)
-        print(f"{name}: {value}")
+    
+    if args.task == 'LBA':
+        result = regression_metrics(targets, predicts)
+        print("\n=== LBA Test Metrics ===")
+        for name, value in result.items():
+            print(f"  {name}: {value:.4f}")
+    else:
+        for name, func in metrics.items():
+            if args.task in ['PSR', 'RSR']:
+                func = partial(func, ids=ids)
+            value = func(targets, predicts)
+            print(f"{name}: {value}")
 
 def train(model, trainset, valset):
-                                
+    """
+    Updated to save the best checkpoint to a named path at the end of train() - SK 25Jun2026.
+    """
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    
-    best_path, best_val = None, np.inf
-    
+
+    seed = getattr(args, 'seed', 0)
+    last_path = f"{models_dir}/{args.task}_seed{seed}_last.pt"
+    best_path = f"{models_dir}/{args.task}_seed{seed}_best.pt"
+    best_val = np.inf
+
     for epoch in range(args.epochs):
         model.train()
-        loss = loop(trainset, model, optimizer=optimizer, max_time=args.train_time)
-        path = f"{models_dir}/{args.task}_{model_id}_{epoch}.pt"
-        torch.save(model.state_dict(), path)
-        print(f'\nEPOCH {epoch} TRAIN loss: {loss:.8f}')
+        train_loss = loop(trainset, model, optimizer=optimizer,
+                          max_time=args.train_time)
+        print(f'\nEPOCH {epoch} TRAIN loss: {train_loss:.8f}')
+
         model.eval()
         with torch.no_grad():
-            loss = loop(valset, model, max_time=args.val_time)
-        print(f'\nEPOCH {epoch} VAL loss: {loss:.8f}')
-        if loss < best_val:
-            best_path, best_val = path, loss
-        print(f'BEST {best_path} VAL loss: {best_val:.8f}')
+            val_loss = loop(valset, model, max_time=args.val_time)
+        print(f'EPOCH {epoch} VAL   loss: {val_loss:.8f}')
+
+        # Always overwrite last — lets you resume a crashed job
+        torch.save(model.state_dict(), last_path)
+
+        # Overwrite best only when val loss improves
+        if val_loss < best_val:
+            best_val = val_loss
+            torch.save(model.state_dict(), best_path)
+            print(f'BEST  updated → {best_path}  (val loss: {best_val:.8f})')
+        else:
+            print(f'BEST  unchanged (val loss: {best_val:.8f})')
+
+    print(f'\nTraining complete. Best checkpoint: {best_path}')
+    print(f'Best val loss: {best_val:.8f}')
     
 def loop(dataset, model, optimizer=None, max_time=None):
     start = time.time()

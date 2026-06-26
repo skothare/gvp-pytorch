@@ -1,0 +1,6 @@
+*.err
+*.out
+*.pt
+
+\__pycache__/
+atom3d-data/
