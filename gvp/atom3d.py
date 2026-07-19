@@ -367,12 +367,12 @@ class LBATransform(BaseTransform):
     '''
     def __call__(self, elem):
         pocket, ligand = elem['atoms_pocket'], elem['atoms_ligand']
-        df = pd.concat([pocket, ligand], ignore_index=True)
+        df = pd.concat([pocket, ligand], ignore_index=True) # 1. stack: pocket rows first, then ligand rows
         
-        data = super().__call__(df)
+        data = super().__call__(df) # # 2. parent turns rows into a graph
         with torch.no_grad():
-            data.label = elem['scores']['neglog_aff']
-            lig_flag = torch.zeros(df.shape[0], device=self.device, dtype=torch.bool)
+            data.label = elem['scores']['neglog_aff']# 3. attach the pKd answer
+            lig_flag = torch.zeros(df.shape[0], device=self.device, dtype=torch.bool) # 4. mark which rows are ligand
             lig_flag[-len(ligand):] = 1
             data.lig_flag = lig_flag
         return data
@@ -638,3 +638,28 @@ class RESModel(BaseModel):
     def forward(self, batch):
         out = super().forward(batch, scatter_mean=False)
         return out[batch.ca_idx+batch.ptr[:-1]]
+
+
+
+class V3LBATransform(LBATransform):
+    """LBATransform + a per-atom V3 embedding attached as data.v3_emb.
+
+    v3_cache_dir is the SPLIT-SPECIFIC directory, e.g. .../charge_zero/val
+    """
+    def __init__(self, v3_cache_dir, **kwargs):
+        super().__init__(**kwargs)
+        self.v3_cache_dir = v3_cache_dir
+
+    def __call__(self, elem):
+        data = super().__call__(elem)
+        pocket_emb = torch.load(
+            f"{self.v3_cache_dir}/{elem['id']}_pocket.pt",
+            weights_only=True,
+        )
+        n_pocket = int((~data.lig_flag).sum())
+        assert pocket_emb.shape[0] == n_pocket, \
+            f"{elem['id']}: cache has {pocket_emb.shape[0]} rows but graph has {n_pocket} pocket nodes"
+        v3_emb = torch.zeros(data.num_nodes, pocket_emb.shape[1])
+        v3_emb[~data.lig_flag] = pocket_emb
+        data.v3_emb = v3_emb
+        return data
