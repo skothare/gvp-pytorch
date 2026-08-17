@@ -378,7 +378,125 @@ class LBATransform(BaseTransform):
         return data
 
 LBAModel = BaseModel
-    
+
+class V3LBATransform(LBATransform):
+    """LBATransform + a per-atom V3 embedding attached as data.v3_emb.
+
+    v3_cache_dir is the SPLIT-SPECIFIC directory, e.g. .../charge_zero/val
+    """
+    def __init__(self, v3_cache_dir, **kwargs):
+        super().__init__(**kwargs) # parent class constructor with parent class setup including the edge cutoff, device, etc.
+        self.v3_cache_dir = v3_cache_dir # points to which folder to read the V3 embeddings from
+
+    def __call__(self, elem):
+        data = super().__call__(elem) # parent class constructor with parent class setup including the edge cutoff, device, etc.: this builds the graph exactly like the baseline parent class constructor.
+        pocket_emb = torch.load( # loads the V3 embeddings for the pocket atoms from the specified folder
+            f"{self.v3_cache_dir}/{elem['id']}_pocket.pt",
+            weights_only=True,
+        )
+        n_pocket = int((~data.lig_flag).sum()) # counts the pocket nodes
+        # SAFETY CHECK: if cache nodes don't match the graph nodes, throw an error per protein
+        assert pocket_emb.shape[0] == n_pocket, \
+            f"{elem['id']}: cache has {pocket_emb.shape[0]} rows but graph has {n_pocket} pocket nodes"
+        v3_emb = torch.zeros(data.num_nodes, pocket_emb.shape[1]) # create a zero tensor with the same number of nodes as the graph and the same number of features as the V3 embeddings
+        v3_emb[~data.lig_flag] = pocket_emb # assign the V3 embeddings to the pocket nodes
+        data.v3_emb = v3_emb # attach the V3 embeddings to the graph
+        return data
+
+class V3LBAModel(BaseModel):
+    """
+    BaseModel (the standard 5-layer GVP-GNN for LBA) with the node-scalar
+    input channel widened to also ingest V3's frozen 128-dim electrostatics
+    embedding.
+
+    Baseline BaseModel gives each node 9 scalar input features: embed(atoms),
+    a learned lookup on the element type. We concatenate V3's 128-dim per-atom
+    embedding onto those 9, so each node enters the network with 9 + 128 = 137
+    scalar features. Everything downstream of the first GVP (the 5 conv layers,
+    W_out, dense) is inherited from BaseModel UNCHANGED and still operates at
+    _DEFAULT_V_DIM = (100, 16); only the first projection W_v is rebuilt wider.
+
+    Requires that each graph in the batch carry a "v3_emb" attribute of shape
+    (num_nodes, 128), as produced by V3LBATransform.
+    """
+
+    #: width of V3's per-atom embedding (V3's d_model); fixed by the V3 checkpoint
+    V3_DIM = 128
+
+    def __init__(self, num_rbf=16, v3_dim=128):
+        # Run BaseModel.__init__ FIRST. This builds embed, W_e, W_v, the 5
+        # conv layers, W_out, and dense exactly as the baseline. We then
+        # overwrite only W_v below. Inheriting first, overriding second, means
+        # we reuse every other component verbatim and touch a single layer.
+        super().__init__(num_rbf=num_rbf)
+        self.v3_dim = v3_dim
+
+        # New scalar input width: the 9 element-embedding features plus V3's 128.
+        in_scalars = _NUM_ATOM_TYPES + self.v3_dim          # 9 + 128 = 137
+
+        # Rebuild W_v to accept (137 scalars, 0 vectors) instead of (9, 0).
+        # This is a VERBATIM copy of BaseModel.__init__ lines 144-148, with the
+        # single change 9 -> 137 in both the LayerNorm and the GVP input dims.
+        #   - LayerNorm((in_scalars, 0)): normalize the 137 incoming scalars
+        #     (0 = there are no input vector features on nodes).
+        #   - GVP((in_scalars, 0), _DEFAULT_V_DIM, ...): project the 137 scalars
+        #     up to the model's working node dimension (100 scalars, 16 vectors).
+        #   - activations=(None, None): no nonlinearity here, matching baseline.
+        #   - vector_gate=True: GVP's vector-gating variant, matching baseline.
+        # The output dim (_DEFAULT_V_DIM) is IDENTICAL to baseline, so the 5
+        # conv layers that follow need no change whatsoever.
+        self.W_v = nn.Sequential(
+            LayerNorm((in_scalars, 0)),
+            GVP((in_scalars, 0), _DEFAULT_V_DIM,
+                activations=(None, None), vector_gate=True)
+        )
+
+    def forward(self, batch, scatter_mean=True, dense=True):
+        """
+        Identical to BaseModel.forward except the first line, which now feeds
+        137 scalars into W_v instead of 9.
+
+        :param batch: torch_geometric Batch carrying, in addition to the usual
+                      BaseTransform attributes, a `v3_emb` of shape (N, 128).
+        :param scatter_mean: if True, mean-pool node embeddings per graph.
+        :param dense: if True, apply the final dense head to get one scalar.
+        """
+        # embed(batch.atoms) -> (N, 9): the learned element-type features.
+        # batch.v3_emb       -> (N, 128): V3's frozen per-atom embedding,
+        #   already row-aligned to the nodes by V3LBATransform + PyG collation
+        #   (this alignment is what the six transform tests verified).
+        # torch.cat(..., dim=-1) -> (N, 137): concatenate along the feature axis
+        #   (dim=-1 = last dim = columns), so node i's 9 element features sit
+        #   beside node i's 128 physics features. Row order is untouched, so the
+        #   atom<->embedding binding proven in testing is preserved here.
+
+        # Guard: the cache is the source of truth. If the batch's embedding width
+        # ever differs from what W_v was built for (e.g. cache regenerated at a
+        # new V3 dimension), fail HERE with a clear message rather than deep
+        # inside a matrix multiply with an inscrutable shape error.
+        assert batch.v3_emb.shape[-1] == self.v3_dim, \
+            f"v3_emb width {batch.v3_emb.shape[-1]} != model v3_dim {self.v3_dim}"
+
+        # Concatenate the element-embedding features and the V3 embedding features.
+        h_V = torch.cat([self.embed(batch.atoms), batch.v3_emb], dim=-1)   # (N, 137)
+
+        # ---- everything below is copied verbatim from BaseModel.forward ----
+        h_E = (batch.edge_s, batch.edge_v)     # edge features: unchanged
+        h_V = self.W_v(h_V)                    # (N,137) -> (100,16) via the widened W_v
+        h_E = self.W_e(h_E)                    # edges projected as in baseline
+
+        batch_id = batch.batch                 # which graph each node belongs to
+
+        for layer in self.layers:              # 5 rounds of GVP message passing
+            h_V = layer(h_V, batch.edge_index, h_E)
+
+        out = self.W_out(h_V)                                          # (N, 100)
+        if scatter_mean:
+            out = torch_scatter.scatter_mean(out, batch_id, dim=0)    # (B, 100) per-graph mean
+        if dense:
+            out = self.dense(out).squeeze(-1)                         # (B,) predicted pKd
+        return out
+
 ########################################################################
     
 class LEPTransform(BaseTransform):
@@ -641,25 +759,3 @@ class RESModel(BaseModel):
 
 
 
-class V3LBATransform(LBATransform):
-    """LBATransform + a per-atom V3 embedding attached as data.v3_emb.
-
-    v3_cache_dir is the SPLIT-SPECIFIC directory, e.g. .../charge_zero/val
-    """
-    def __init__(self, v3_cache_dir, **kwargs):
-        super().__init__(**kwargs)
-        self.v3_cache_dir = v3_cache_dir
-
-    def __call__(self, elem):
-        data = super().__call__(elem)
-        pocket_emb = torch.load(
-            f"{self.v3_cache_dir}/{elem['id']}_pocket.pt",
-            weights_only=True,
-        )
-        n_pocket = int((~data.lig_flag).sum())
-        assert pocket_emb.shape[0] == n_pocket, \
-            f"{elem['id']}: cache has {pocket_emb.shape[0]} rows but graph has {n_pocket} pocket nodes"
-        v3_emb = torch.zeros(data.num_nodes, pocket_emb.shape[1])
-        v3_emb[~data.lig_flag] = pocket_emb
-        data.v3_emb = v3_emb
-        return data

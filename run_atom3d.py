@@ -31,7 +31,11 @@ parser.add_argument('--seed', metavar='N', type=int, default=42,
                     help='random seed for reproducibility, default=42')
 parser.add_argument('--load', metavar='PATH', default=None, 
                     help='initialize first 2 GNN layers with pretrained weights')
-
+# V3 electrostatics fusion (LBA only). Points at the PARENT of the split
+# subdirs, e.g. .../charge_zero (Option A) or .../charge_real (Option C).
+# Absent => plain geometry-only baseline, unchanged.
+parser.add_argument('--v3-cache', metavar='DIR', default=None,
+                    help='parent dir of V3 cache split subdirs; enables V3 fusion arm')
 args = parser.parse_args()
 
 import gvp
@@ -53,6 +57,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model_id = float(time.time())
 
 def main():
+    print(f"Using device: {device}", flush=True)
+    if device == 'cuda':
+        torch.zeros(1).cuda()  
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     datasets = get_datasets(args.task, args.lba_split)
@@ -259,6 +266,20 @@ def get_datasets(task, lba_split=30):
         testset = gvp.atom3d.PPIDataset(data_path+'test')
         
     else:
+        if task == 'LBA' and args.v3_cache:
+            # V3 fusion arm: one transform PER split, each pointed at its own
+            # cache subdir. A single shared instance can't work here because the
+            # cache is split into {train,val,test}/ and the transform carries a
+            # split-specific directory.
+            V3 = gvp.atom3d.V3LBATransform
+            trainset = LMDBDataset(data_path+'train',
+                                   transform=V3(v3_cache_dir=f"{args.v3_cache}/train"))
+            valset   = LMDBDataset(data_path+'val',
+                                   transform=V3(v3_cache_dir=f"{args.v3_cache}/val"))
+            testset  = LMDBDataset(data_path+'test',
+                                   transform=V3(v3_cache_dir=f"{args.v3_cache}/test"))
+            return trainset, valset, testset
+
         transform = {                       
             'RSR' : gvp.atom3d.RSRTransform,
             'PSR' : gvp.atom3d.PSRTransform,
@@ -275,6 +296,8 @@ def get_datasets(task, lba_split=30):
     return trainset, valset, testset
 
 def get_model(task):
+    if task == 'LBA' and args.v3_cache:
+        return gvp.atom3d.V3LBAModel() # 137-wide W_v, reads batch.v3_emb
     return {
         'RES' : gvp.atom3d.RESModel,
         'PPI' : gvp.atom3d.PPIModel,
