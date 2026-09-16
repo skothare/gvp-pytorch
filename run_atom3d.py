@@ -34,9 +34,16 @@ parser.add_argument('--load', metavar='PATH', default=None,
 # V3 electrostatics fusion (LBA only). Points at the PARENT of the split
 # subdirs, e.g. .../charge_zero (Option A) or .../charge_real (Option C).
 # Absent => plain geometry-only baseline, unchanged.
-parser.add_argument('--v3-cache', metavar='DIR', default=None,
+fusion = parser.add_mutually_exclusive_group()
+fusion.add_argument('--v3-cache', metavar='DIR', default=None,
                     help='parent dir of V3 cache split subdirs; enables V3 fusion arm')
+fusion.add_argument('--v8-cache', metavar='DIR', default=None,
+                    help='parent dir of audited V8 cache split subdirs (256 features)')
+parser.add_argument('--models-dir', default='models',
+                    help='checkpoint output directory; default preserves existing runs')
 args = parser.parse_args()
+if args.v8_cache and args.task != 'LBA':
+    parser.error('--v8-cache is only supported for LBA')
 
 import gvp
 from atom3d.datasets import LMDBDataset
@@ -52,7 +59,7 @@ from collections import defaultdict
 import scipy.stats as stats
 print = partial(print, flush=True)
 
-models_dir = 'models'
+models_dir = args.models_dir
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model_id = float(time.time())
 
@@ -75,6 +82,7 @@ def main():
         test(model, testset)
 
     else:
+        os.makedirs(models_dir, exist_ok=True)
         if args.load:
             load(model, args.load)
         train(model, trainset, valset)
@@ -266,6 +274,23 @@ def get_datasets(task, lba_split=30):
         testset = gvp.atom3d.PPIDataset(data_path+'test')
         
     else:
+        if task == 'LBA' and args.v8_cache:
+            from v8_lba import validate_gvp_cache
+            datasets, contracts = [], []
+            for split in ('train', 'val', 'test'):
+                directory = f"{args.v8_cache}/{split}"
+                dataset = LMDBDataset(data_path + split,
+                    transform=gvp.atom3d.V3LBATransform(v3_cache_dir=directory))
+                contract = validate_gvp_cache(directory, dataset.ids())
+                if contract['split'] != split:
+                    raise ValueError(f'V8 cache split mismatch: {directory}')
+                contracts.append(contract)
+                datasets.append(dataset)
+            if len({c['checkpoint_sha256'] for c in contracts}) != 1 or \
+                    len({c['charge_mode'] for c in contracts}) != 1:
+                raise ValueError('V8 cache splits disagree on checkpoint or charge mode')
+            print(f"V8 fusion: 256 encoder features, charge_mode={contracts[0]['charge_mode']}")
+            return tuple(datasets)
         if task == 'LBA' and args.v3_cache:
             # V3 fusion arm: one transform PER split, each pointed at its own
             # cache subdir. A single shared instance can't work here because the
@@ -296,6 +321,8 @@ def get_datasets(task, lba_split=30):
     return trainset, valset, testset
 
 def get_model(task):
+    if task == 'LBA' and args.v8_cache:
+        return gvp.atom3d.V3LBAModel(v3_dim=256)
     if task == 'LBA' and args.v3_cache:
         return gvp.atom3d.V3LBAModel() # 137-wide W_v, reads batch.v3_emb
     return {
