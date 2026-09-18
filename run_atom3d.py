@@ -39,11 +39,18 @@ fusion.add_argument('--v3-cache', metavar='DIR', default=None,
                     help='parent dir of V3 cache split subdirs; enables V3 fusion arm')
 fusion.add_argument('--v8-cache', metavar='DIR', default=None,
                     help='parent dir of audited V8 cache split subdirs (256 features)')
+fusion.add_argument('--v8-decoder-cache', metavar='DIR', default=None,
+                    help='parent dir of audited V8 decoder cache split subdirs (256 hidden features)')
+fusion.add_argument('--v9-decoder-cache', default=None,
+                    help='audited V9 dual cache ROOT; real decoder features')
+parser.add_argument('--predictions-file', default=None, help='LBA test predictions CSV with complex IDs')
 parser.add_argument('--models-dir', default='models',
                     help='checkpoint output directory; default preserves existing runs')
 args = parser.parse_args()
-if args.v8_cache and args.task != 'LBA':
-    parser.error('--v8-cache is only supported for LBA')
+if (args.v8_cache or args.v8_decoder_cache or args.v9_decoder_cache) and args.task != 'LBA':
+    parser.error('Electro-Prot cache options are only supported for LBA')
+if args.predictions_file and (args.task != 'LBA' or not args.test):
+    parser.error('--predictions-file requires LBA --test')
 
 import gvp
 from atom3d.datasets import LMDBDataset
@@ -63,6 +70,18 @@ models_dir = args.models_dir
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 model_id = float(time.time())
 
+class IdentifiedDataset(torch.utils.data.Dataset):
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.ids = dataset.ids()
+    def __len__(self):
+        return len(self.dataset)
+    def __getitem__(self, index):
+        graph = self.dataset[index]
+        graph.complex_id = self.ids[index]
+        return graph
+
+
 def main():
     print(f"Using device: {device}", flush=True)
     if device == 'cuda':
@@ -75,6 +94,9 @@ def main():
     if args.task not in ['PPI', 'RES']:
         dataloader = partial(dataloader, shuffle=True)
         
+    if args.predictions_file:
+        datasets = list(datasets)
+        datasets[2] = IdentifiedDataset(datasets[2])
     trainset, valset, testset = map(dataloader, datasets)    
     model = get_model(args.task).to(device)
     
@@ -99,6 +121,8 @@ def test(model, testset):
             label = get_label(batch, args.task, args.smp_idx)
             if args.task == 'RES':
                 pred = pred.argmax(dim=-1)
+            if args.predictions_file:
+                ids.extend(batch.complex_id)
             if args.task in ['PSR', 'RSR']:
                 ids.extend(batch.id)
             targets.extend(list(label.cpu().numpy()))
@@ -106,6 +130,12 @@ def test(model, testset):
 
     
     if args.task == 'LBA':
+        if args.predictions_file:
+            import csv
+            with open(args.predictions_file, 'x', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(['id', 'target', 'prediction'])
+                writer.writerows(zip(ids, targets, predicts))
         result = regression_metrics(targets, predicts)
         print("\n=== LBA Test Metrics ===")
         for name, value in result.items():
@@ -274,11 +304,30 @@ def get_datasets(task, lba_split=30):
         testset = gvp.atom3d.PPIDataset(data_path+'test')
         
     else:
-        if task == 'LBA' and args.v8_cache:
-            from v8_lba import validate_gvp_cache
+        if task == 'LBA' and args.v9_decoder_cache:
+            from lba_v9_workflow import validate_cache
+            from pathlib import Path
+            validate_cache(args.v9_decoder_cache)
+            from v9_lba import read_manifest
+            datasets = []
+            for split in ('train', 'val', 'test'):
+                directory = Path(args.v9_decoder_cache) / 'decoder' / 'charge_real' / split
+                dataset = LMDBDataset(data_path + split,
+                    transform=gvp.atom3d.V3LBATransform(v3_cache_dir=str(directory)))
+                read_manifest(directory, ids=dataset.ids())
+                datasets.append(dataset)
+            print('V9 fusion: 256 decoder features, charge_mode=real')
+            return tuple(datasets)
+        if task == 'LBA' and (args.v8_cache or args.v8_decoder_cache):
+            if args.v8_decoder_cache:
+                from v8_decoder_lba import validate_gvp_cache
+            else:
+                from v8_lba import validate_gvp_cache
+            cache = args.v8_decoder_cache or args.v8_cache
+            representation = 'decoder' if args.v8_decoder_cache else 'encoder'
             datasets, contracts = [], []
             for split in ('train', 'val', 'test'):
-                directory = f"{args.v8_cache}/{split}"
+                directory = f"{cache}/{split}"
                 dataset = LMDBDataset(data_path + split,
                     transform=gvp.atom3d.V3LBATransform(v3_cache_dir=directory))
                 contract = validate_gvp_cache(directory, dataset.ids())
@@ -289,7 +338,9 @@ def get_datasets(task, lba_split=30):
             if len({c['checkpoint_sha256'] for c in contracts}) != 1 or \
                     len({c['charge_mode'] for c in contracts}) != 1:
                 raise ValueError('V8 cache splits disagree on checkpoint or charge mode')
-            print(f"V8 fusion: 256 encoder features, charge_mode={contracts[0]['charge_mode']}")
+            if len({(c['input_protocol'], c.get('query_protocol'), c.get('query_chunk_size')) for c in contracts}) != 1:
+                raise ValueError('V8 cache splits disagree on representation/query protocol')
+            print(f"V8 fusion: 256 {representation} features, charge_mode={contracts[0]['charge_mode']}")
             return tuple(datasets)
         if task == 'LBA' and args.v3_cache:
             # V3 fusion arm: one transform PER split, each pointed at its own
@@ -321,7 +372,7 @@ def get_datasets(task, lba_split=30):
     return trainset, valset, testset
 
 def get_model(task):
-    if task == 'LBA' and args.v8_cache:
+    if task == 'LBA' and (args.v8_cache or args.v8_decoder_cache or args.v9_decoder_cache):
         return gvp.atom3d.V3LBAModel(v3_dim=256)
     if task == 'LBA' and args.v3_cache:
         return gvp.atom3d.V3LBAModel() # 137-wide W_v, reads batch.v3_emb

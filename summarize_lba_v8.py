@@ -28,7 +28,11 @@ def git_info(root):
             "status": subprocess.check_output(["git", "-C", str(root), "status", "--short"], text=True)}
 
 
-def initialize(log_root, model_root, cache_root, phase, array=False):
+def initialize(log_root, model_root, cache_root, phase, array=False, representation="encoder"):
+    if representation not in ("encoder", "decoder"):
+        raise ValueError("Unknown V8 representation")
+    if representation == "decoder" and not array:
+        raise ValueError("Decoder runs require --array")
     path = Path(log_root) / "run.json"
     if path.exists():
         raise ValueError(f"Refusing to replace existing run provenance: {path}")
@@ -36,7 +40,10 @@ def initialize(log_root, model_root, cache_root, phase, array=False):
     audit = None
     if array:
         sys.path.insert(0, str(EVAL))
-        from v8_lba import read_manifest
+        if representation == "decoder":
+            from v8_decoder_lba import read_manifest
+        else:
+            from v8_lba import read_manifest
         counts = dict(train=3507, val=466, test=490)
         audit_path = cache_root / "audit_recheck.json"
         if not audit_path.exists():
@@ -56,8 +63,15 @@ def initialize(log_root, model_root, cache_root, phase, array=False):
     manifest_paths = {f"{mode}/{split}": cache_root / f"charge_{mode}" / split / "_manifest.json"
                       for mode in ("real", "zero") for split in ("train", "val", "test")}
     manifests = {key: json.loads(path.read_text())["contract"] for key, path in manifest_paths.items()}
+    if representation == "decoder":
+        if (audit.get("representation") != "decoder" or
+            audit.get("cache_root") != str(cache_root) or
+            audit.get("manifest_sha256") != {key: sha(path) for key, path in manifest_paths.items()}):
+            raise ValueError("Decoder audit is stale or belongs to another cache")
+        if len({c["checkpoint_sha256"] for c in manifests.values()}) != 1:
+            raise ValueError("Decoder cache arms/splits disagree on checkpoint")
     import torch
-    info = dict(phase=phase, epochs=1 if phase == "rehearsal" else 50,
+    info = dict(representation=representation, phase=phase, epochs=1 if phase == "rehearsal" else 50,
                 seeds=[42] if phase == "rehearsal" else [42, 123, 7], arms=list(ARMS),
                 batch=8, lr=1e-4, num_workers=4, train_time=0, val_time=0,
                 model_root=str(Path(model_root).resolve()), cache_root=str(cache_root),
@@ -72,6 +86,9 @@ def initialize(log_root, model_root, cache_root, phase, array=False):
         info["execution"] = "slurm_array_v1"
         info["audit"] = dict(path=str(audit_path), sha256=sha(audit_path), result=audit)
         info["source_sha256"]["submit_lba_v8_array.sh"] = sha(ROOT / "submit_lba_v8_array.sh")
+    if representation == "decoder":
+        info["estats_source_sha256"] = {name: sha(EVAL / name) for name in
+                                        ("v8_lba.py", "v8_decoder_lba.py")}
     info["slurm_job_id"] = os.environ.get("SLURM_JOB_ID")
     info["slurm_node"] = os.environ.get("SLURMD_NODENAME")
     # Exclusive creation also protects simultaneous initialization attempts.
@@ -84,6 +101,9 @@ def array_config(log_root):
     info = json.loads((Path(log_root) / "run.json").read_text())
     if info.get("execution") != "slurm_array_v1":
         raise ValueError("Initialize this run with --array first")
+    info.setdefault("representation", "encoder")
+    if info["representation"] not in ("encoder", "decoder"):
+        raise ValueError("Unknown V8 representation")
     phase = info["phase"]
     if (phase not in ("rehearsal", "production") or info["arms"] != list(ARMS) or
         info["seeds"] != ([42] if phase == "rehearsal" else [42, 123, 7]) or
@@ -94,10 +114,21 @@ def array_config(log_root):
     for name, digest in info["source_sha256"].items():
         if sha(ROOT / name) != digest:
             raise ValueError(f"Source changed after initialization: {name}")
+    for name, digest in info.get("estats_source_sha256", {}).items():
+        if sha(EVAL / name) != digest:
+            raise ValueError(f"Cache validation source changed after initialization: {name}")
     for name, digest in info["cache_manifest_sha256"].items():
         mode, split = name.split("/")
         if sha(Path(info["cache_root"]) / f"charge_{mode}" / split / "_manifest.json") != digest:
             raise ValueError(f"Cache manifest changed: {name}")
+    if info["representation"] == "decoder":
+        sys.path.insert(0, str(EVAL))
+        from v8_decoder_lba import PROTOCOL, QUERY_PROTOCOL, QUERY_CHUNK_SIZE
+        for contract in info["cache_contracts"].values():
+            if (contract.get("representation"), contract.get("input_protocol"),
+                contract.get("query_protocol"), contract.get("query_chunk_size")) != (
+                    "decoder", PROTOCOL, QUERY_PROTOCOL, QUERY_CHUNK_SIZE):
+                raise ValueError("Run metadata is not a decoder cache contract")
     for key in ("cache_root", "model_root"):
         if "\n" in info[key]:
             raise ValueError("Paths containing newlines are unsupported")
@@ -183,7 +214,7 @@ def summarize(log_root):
                     receipt.get("checkpoint_sha256") != sha(model) or
                     receipt.get("log_sha256") != sha(root / arm / f"seed{seed}.log")):
                     raise ValueError(f"Invalid array completion record: {arm}/{seed}")
-            rows.append(dict(arm=arm, seed=seed, **result, checkpoint_sha256=sha(model)))
+            rows.append(dict(representation=info.get("representation", "encoder"), arm=arm, seed=seed, **result, checkpoint_sha256=sha(model)))
     summary, paired = {}, {}
     for arm in ARMS:
         summary[arm] = {metric: dict(mean=float(np.mean([r[metric] for r in rows if r["arm"] == arm])),
@@ -201,8 +232,8 @@ def summarize(log_root):
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    (root / "metrics.json").write_text(json.dumps(dict(phase=phase, rows=rows, summary=summary, paired=paired), indent=2) + "\n")
-    lines = [f"# GVP + V8 LBA: {phase}", "", "Real versus zero changes both charges and radii. "
+    (root / "metrics.json").write_text(json.dumps(dict(representation=info.get("representation", "encoder"), phase=phase, rows=rows, summary=summary, paired=paired), indent=2) + "\n")
+    lines = [f"# GVP + V8 {info.get('representation', 'encoder')} LBA: {phase}", "", "Real versus zero changes both charges and radii. "
              "Metrics retain the runner log's four-decimal precision. Standard deviations use ddof=0.", "",
              "| Arm | Seed | RMSE | Pearson | Spearman | R² |", "|---|---|---|---|---|---|"]
     lines += [f"| {r['arm']} | {r['seed']} | " + " | ".join(f"{r[m]:.4f}" for m in METRICS) + " |" for r in rows]
@@ -224,12 +255,13 @@ def main():
     p.add_argument("--array", action="store_true", help="Initialize provenance for the shell array launcher")
     p.add_argument("--model-root")
     p.add_argument("--cache-root", default=str(EVAL / "v8_lba_precomputed_cache"))
+    p.add_argument("--representation", choices=("encoder", "decoder"), default="encoder")
     p.add_argument("--phase", choices=("rehearsal", "production"), default="production")
     args = p.parse_args()
     if args.initialize:
         if not args.model_root:
             p.error("--initialize requires --model-root")
-        initialize(args.log_root, args.model_root, args.cache_root, args.phase, array=args.array)
+        initialize(args.log_root, args.model_root, args.cache_root, args.phase, array=args.array, representation=args.representation)
     else:
         summarize(args.log_root)
 

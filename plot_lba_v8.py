@@ -112,6 +112,8 @@ def save(fig, directory, stem):
 
 def plot(root):
     info = json.loads((root / "run.json").read_text())
+    representation = info.get("representation", "encoder")
+    labels = {arm: label.replace("GVP + V8", f"GVP + V8 {representation}") for arm, label in LABELS.items()}
     rows, summary, paired = summarize(root)
     curves = audit_logs(root, rows)
     seeds = list(dict.fromkeys(r["seed"] for r in rows))
@@ -131,12 +133,12 @@ def plot(root):
         for i, arm in enumerate(ORDER):
             ax.errorbar(i + .13, summary[arm][metric]["mean"],
                         yerr=summary[arm][metric]["std"], fmt="D", color="black", capsize=4, markersize=5)
-        ax.set(xticks=range(3), xticklabels=[LABELS[a] for a in ORDER], title=title, xlim=(-.4, 2.5))
+        ax.set(xticks=range(3), xticklabels=[labels[a] for a in ORDER], title=title, xlim=(-.4, 2.5))
         ax.grid(axis="y", alpha=.2)
     handles = [Line2D([], [], color="gray", marker=m, linestyle="none", label=f"Seed {s}") for s,m in zip(seeds,markers)]
     handles += [Line2D([], [], color="black", marker="D", linestyle="none", label="Mean ± population SD")]
     axes[0, 0].legend(handles=handles, fontsize=8)
-    fig.suptitle(f"ATOM3D LBA-30 • held-out test results\n{info['epochs']} epochs; best-validation checkpoint; n = {len(seeds)} seeds", fontsize=14)
+    fig.suptitle(f"ATOM3D LBA-30 • V8 {representation} • held-out test results\n{info['epochs']} epochs; best-validation checkpoint; n = {len(seeds)} seeds", fontsize=14)
     save(fig, directory, "test_metrics")
 
     contrasts = [("v8_real", "v8_zero"), ("v8_real", "baseline"), ("v8_zero", "baseline")]
@@ -152,7 +154,7 @@ def plot(root):
                title=title.replace("RMSE", "Δ RMSE").replace("Pearson", "Δ Pearson").replace("Spearman", "Δ Spearman").replace("R²", "Δ R²"), xlim=(-.4,2.5))
         ax.grid(axis="y", alpha=.2)
     axes[0,0].legend(handles=handles, fontsize=8)
-    fig.suptitle("Paired test-metric differences by training seed\nNegative favors first arm for RMSE; positive favors first arm for correlations and R²", fontsize=12)
+    fig.suptitle(f"V8 {representation}: paired test-metric differences by training seed\nNegative favors first arm for RMSE; positive favors first arm for correlations and R²", fontsize=12)
     save(fig, directory, "paired_differences")
 
     fig, axes = plt.subplots(3, len(seeds), figsize=(13, 10), squeeze=False, sharex=True, sharey=True, layout="constrained")
@@ -165,12 +167,12 @@ def plot(root):
             ax.plot(epochs,c["TRAIN"], color="#536878",label="Train")
             ax.plot(epochs,c["VAL"], color="#D98624",label="Validation")
             ax.scatter(best+1,c["VAL"][best], color="black",marker="*",s=70,label="Lowest logged val loss")
-            ax.set(title=f"{LABELS[arm].replace(chr(10), ' ')} • seed {seed}")
+            ax.set(title=f"{labels[arm].replace(chr(10), ' ')} • seed {seed}")
             ax.grid(alpha=.2)
             if i == 2: ax.set_xlabel("Epoch (1-based)")
             if j == 0: ax.set_ylabel("Logged mean batch MSE")
     axes[0,0].legend(fontsize=8)
-    fig.suptitle(f"Training and validation histories • all {len(rows)} runs\nShared axes; checkpoint selection uses validation loss, not test metrics",fontsize=13)
+    fig.suptitle(f"V8 {representation}: training and validation histories • all {len(rows)} runs\nShared axes; checkpoint selection uses validation loss, not test metrics",fontsize=13)
     save(fig, directory, "learning_curves")
     provenance = dict(python=sys.executable, matplotlib=matplotlib.__version__, numpy=np.__version__,
                       script_sha256=sha(__file__), metrics_sha256=sha(root / 'metrics.json'),

@@ -36,7 +36,7 @@ CONFIG="$(python - "$LOG_ROOT" <<'PY'
 import sys
 from summarize_lba_v8 import array_config
 info = array_config(sys.argv[1])
-for key in ('phase', 'cache_root', 'model_root', 'epochs'):
+for key in ('phase', 'cache_root', 'model_root', 'epochs', 'representation'):
     print(info[key])
 PY
 )"
@@ -45,11 +45,14 @@ PHASE="${SETTINGS[0]}"
 CACHE="${SETTINGS[1]}"
 MODEL_ROOT="${SETTINGS[2]}"
 EPOCHS="${SETTINGS[3]}"
+REPRESENTATION="${SETTINGS[4]}"
+CACHE_FLAG=--v8-cache
+if [[ "$REPRESENTATION" == decoder ]]; then CACHE_FLAG=--v8-decoder-cache; fi
 if [[ "$PHASE" == rehearsal && "$SEED" != 42 ]]; then
     echo 'Rehearsal requires --array=0,3,6%2' >&2; exit 2
 fi
 if [[ "${1:-}" == --describe ]]; then
-    echo "task=$SLURM_ARRAY_TASK_ID arm=$ARM seed=$SEED phase=$PHASE epochs=$EPOCHS cache=$CACHE"
+    echo "task=$SLURM_ARRAY_TASK_ID arm=$ARM seed=$SEED phase=$PHASE epochs=$EPOCHS representation=$REPRESENTATION cache=$CACHE"
     exit 0
 fi
 [[ $# == 0 ]] || { echo 'Only --describe is supported' >&2; exit 2; }
@@ -85,8 +88,8 @@ Path(os.environ['ARRAY_ATTEMPT_LOG'], 'attempt.json').write_text(json.dumps(reco
 PY
 EXTRA=()
 case "$ARM" in
-    v8_real) EXTRA=(--v8-cache "$CACHE/charge_real") ;;
-    v8_zero) EXTRA=(--v8-cache "$CACHE/charge_zero") ;;
+    v8_real) EXTRA=("$CACHE_FLAG" "$CACHE/charge_real") ;;
+    v8_zero) EXTRA=("$CACHE_FLAG" "$CACHE/charge_zero") ;;
 esac
 COMMON=(LBA --lba-split 30 --batch 8 --num-workers 4 --lr 1e-4 --seed "$SEED"
         --models-dir "$ATTEMPT_MODEL" "${EXTRA[@]}")
