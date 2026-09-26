@@ -1,0 +1,19 @@
+
+# Isolated LBA paper reproduction: source and small evidence are tracked.
+!benchmarks/
+!benchmarks/atom3d_lba/
+!benchmarks/atom3d_lba/**/
+!benchmarks/atom3d_lba/**/*.py
+!benchmarks/atom3d_lba/**/*.sh
+!benchmarks/atom3d_lba/**/*.json
+!benchmarks/atom3d_lba/**/*.csv
+!benchmarks/atom3d_lba/**/*.md
+!benchmarks/atom3d_lba/**/*.txt
+!benchmarks/atom3d_lba/**/*.yml
+!tests/atom3d_lba/
+!tests/atom3d_lba/**/*.py
+__pycache__/
+.pytest_cache/
+!tests/atom3d_lba/**/*.ini
+!tests/atom3d_lba/**/*.npz
+!tests/atom3d_lba/**/*.json
