@@ -1,0 +1,10 @@
+{
+  "reference_commit": "631deaab54f79d6dcef20bd5a61fcd27fd4eb9d1",
+  "source_sha256": {
+    "gvp/atom3d.py": "13497b5c503b5346a3783cd14aa32345dfd65898a4fb0cab49f7c35c93679639",
+    "unified_lba_runner.py": "d4b921a50fb2a8ab8fb813867efc322e87ceeae4aceeed05b927e4fd10607c4b",
+    "run_atom3d_ep20.py": "584a9b71f37f6a1dd8db6512cf3e043a964f790e5fc32465effd4afc9859577c",
+    "lba_control_features.py": "0a5862352481a710532afe576ae1c4246ad824852eff49e011a10da449bce212"
+  },
+  "release_note": "Source hashes identify historical inputs. Imports, portability/provenance and repair-publication safety were adapted in this isolated package; mathematical implementations are covered by compatibility tests."
+}

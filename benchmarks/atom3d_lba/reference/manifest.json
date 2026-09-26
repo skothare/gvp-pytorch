@@ -1,0 +1,808 @@
+{
+  "records": [
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 101,
+      "prediction": "predictions/b_baseline_101.csv",
+      "sha256": "6f9c5bc30671f319d0b5665586455b50d296892f61c8e1262ec4ef8356555de7",
+      "expected": {
+        "rmse": 1.488445611223063,
+        "pearson_r": 0.4722901525451183,
+        "spearman_r": 0.4503292898560993,
+        "r2": 0.21903185601713593
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 123,
+      "prediction": "predictions/b_baseline_123.csv",
+      "sha256": "a5c94d818cb736d8733447f47962142a6a7543488ad8a9f1c6c5c5ed877f5e16",
+      "expected": {
+        "rmse": 1.62909373982625,
+        "pearson_r": 0.3184767389686603,
+        "spearman_r": 0.3189811687351517,
+        "r2": 0.06446610033386213
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 17,
+      "prediction": "predictions/b_baseline_17.csv",
+      "sha256": "d61cf2f24370af30cbb13954e663b8bc9d151097ca8cd6d3dbd07c487b36b9b9",
+      "expected": {
+        "rmse": 1.5806020330211998,
+        "pearson_r": 0.34980277412567806,
+        "spearman_r": 0.3308689412962131,
+        "r2": 0.11933152187994533
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 2026,
+      "prediction": "predictions/b_baseline_2026.csv",
+      "sha256": "18fd3e856de847d3d958986271bc8a76207066144dd330020c9ee1fa37720879",
+      "expected": {
+        "rmse": 1.4718046275010408,
+        "pearson_r": 0.5037067108435003,
+        "spearman_r": 0.4902392678806672,
+        "r2": 0.23639685651255393
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 211,
+      "prediction": "predictions/b_baseline_211.csv",
+      "sha256": "a9b6ed1a29561fa54c7cf757ee04fdab82b3b56b73b44f1cb120e37ba55c6826",
+      "expected": {
+        "rmse": 1.6282912620459826,
+        "pearson_r": 0.29804072624021105,
+        "spearman_r": 0.31233098472838966,
+        "r2": 0.0653875454827374
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 29,
+      "prediction": "predictions/b_baseline_29.csv",
+      "sha256": "20790aa9e0ac650ea626e0ab84bc6a30def7aacaff6213cba6f5dbe8a8c70591",
+      "expected": {
+        "rmse": 1.5780879141802737,
+        "pearson_r": 0.3662710541475689,
+        "spearman_r": 0.3629081545152688,
+        "r2": 0.1221308910824106
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 307,
+      "prediction": "predictions/b_baseline_307.csv",
+      "sha256": "b024d574d521810ffdbb4f4dedad12c47f2efb18eeac3b503f9f4d4e8b6bf272",
+      "expected": {
+        "rmse": 1.5004588920665822,
+        "pearson_r": 0.48068024135581733,
+        "spearman_r": 0.4558959298169728,
+        "r2": 0.206374556743129
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 42,
+      "prediction": "predictions/b_baseline_42.csv",
+      "sha256": "bba94425767ee4d5c8e0a9d1be8568007ab96af1995ed48b0d2a6ad2b69ad2ea",
+      "expected": {
+        "rmse": 1.5011818702289932,
+        "pearson_r": 0.4741590749060213,
+        "spearman_r": 0.4598364377104854,
+        "r2": 0.2056095746424157
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 53,
+      "prediction": "predictions/b_baseline_53.csv",
+      "sha256": "95d489e60548f03df1fc795051956807e3a387527f57e7c342699e203545e896",
+      "expected": {
+        "rmse": 1.6596506268038906,
+        "pearson_r": 0.21341166201599804,
+        "spearman_r": 0.20500147429120974,
+        "r2": 0.029041365794868934
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "baseline",
+      "seed": 7,
+      "prediction": "predictions/b_baseline_7.csv",
+      "sha256": "1d3fa539f2b03421be925ad421969c2a01012d50b7d28091d9229ed725c5e85c",
+      "expected": {
+        "rmse": 1.5747195296224432,
+        "pearson_r": 0.37567975533511344,
+        "spearman_r": 0.36712120591726427,
+        "r2": 0.12587446570330918
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 101,
+      "prediction": "predictions/b_ep20_101.csv",
+      "sha256": "3166ff2be8c0b9c1b39fa453fcdcec07bdd7b0ef31a4d29c05cca74d00670f88",
+      "expected": {
+        "rmse": 1.5302932026980227,
+        "pearson_r": 0.4538440909681348,
+        "spearman_r": 0.42826907564047223,
+        "r2": 0.17450075986442126
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 123,
+      "prediction": "predictions/b_ep20_123.csv",
+      "sha256": "231073e55296644ed6a852078c1ef412b46062eafb7d84c414f78476f0368b4d",
+      "expected": {
+        "rmse": 1.5954065254817251,
+        "pearson_r": 0.4376467174315016,
+        "spearman_r": 0.4190624192441665,
+        "r2": 0.10275694056429929
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 17,
+      "prediction": "predictions/b_ep20_17.csv",
+      "sha256": "e7938e3401c254b850ae1ddc322f0f14e5b5083ed2f621b8b5bb999b012d70d5",
+      "expected": {
+        "rmse": 1.692940389046679,
+        "pearson_r": 0.4084906211992818,
+        "spearman_r": 0.3742287570991899,
+        "r2": -0.010300834920834001
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 2026,
+      "prediction": "predictions/b_ep20_2026.csv",
+      "sha256": "4823aea18f1134e412250c0743fd8cee212c0848d02c7eac96eef330af50e7e0",
+      "expected": {
+        "rmse": 1.5605629062624198,
+        "pearson_r": 0.4419964321960505,
+        "spearman_r": 0.4130659010585545,
+        "r2": 0.14152048014155083
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 211,
+      "prediction": "predictions/b_ep20_211.csv",
+      "sha256": "1f31202a4c3772507c57b01bb4cab28330bca723dbb3d341d09e7552abcfe34f",
+      "expected": {
+        "rmse": 1.558507462135253,
+        "pearson_r": 0.47897442309284344,
+        "spearman_r": 0.4409314348046097,
+        "r2": 0.14378042700610194
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 29,
+      "prediction": "predictions/b_ep20_29.csv",
+      "sha256": "d81104b34b8e36c3e94f0a6dad61b081e8f01acf2cc02e5f07bd8df6b407498e",
+      "expected": {
+        "rmse": 1.562925447985064,
+        "pearson_r": 0.4589660246255536,
+        "spearman_r": 0.43461183220166255,
+        "r2": 0.13891920220477028
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 307,
+      "prediction": "predictions/b_ep20_307.csv",
+      "sha256": "da3a61df6f26c7764c11c7dee9970a5f6088ddc8b5adc804c333b3701d919e1e",
+      "expected": {
+        "rmse": 1.5822219133695727,
+        "pearson_r": 0.4303423561527025,
+        "spearman_r": 0.4226009458626299,
+        "r2": 0.11752549032299897
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 42,
+      "prediction": "predictions/b_ep20_42.csv",
+      "sha256": "d0cf45ef4d34cf6df755c8e64e880aaa06effa13e5ebc6f382bc1ed875b31c98",
+      "expected": {
+        "rmse": 1.529025235028228,
+        "pearson_r": 0.44137005861398504,
+        "spearman_r": 0.4269215560706491,
+        "r2": 0.17586817456250425
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 53,
+      "prediction": "predictions/b_ep20_53.csv",
+      "sha256": "0f00896ca952e836db94d33271232b946fef56e482a4fa13873ec87193b47c01",
+      "expected": {
+        "rmse": 1.8495862853919498,
+        "pearson_r": 0.369599059906788,
+        "spearman_r": 0.3434602065885644,
+        "r2": -0.2059146533388263
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "ep20",
+      "seed": 7,
+      "prediction": "predictions/b_ep20_7.csv",
+      "sha256": "4e9dafae948a687b0bf99c8a5ee345e7d75f21b87ab34466591bf5e6438e0aea",
+      "expected": {
+        "rmse": 1.5401702853300867,
+        "pearson_r": 0.45974583723218704,
+        "spearman_r": 0.42689651511580906,
+        "r2": 0.1638102109747992
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 101,
+      "prediction": "predictions/b_random_ep_101.csv",
+      "sha256": "b7565711d57fe8ee7b4ac5f2d2ac9cc3296098e1c9ae1f294cd1858ea4ff15c5",
+      "expected": {
+        "rmse": 1.9091885485940479,
+        "pearson_r": 0.22448072512995806,
+        "spearman_r": 0.2141499397924595,
+        "r2": -0.2848872541486043
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 123,
+      "prediction": "predictions/b_random_ep_123.csv",
+      "sha256": "2c53b0fd446bc956612248c2bdc686a8bcfb26311e4383bbdb2c4c5927568e9c",
+      "expected": {
+        "rmse": 1.6939120184751224,
+        "pearson_r": 0.2811919825861336,
+        "spearman_r": 0.254171486597124,
+        "r2": -0.011460851806179617
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 17,
+      "prediction": "predictions/b_random_ep_17.csv",
+      "sha256": "997b2f681e8f28d1772e51da2471c9ae65ea3af7ae5cf87403c33996d055423f",
+      "expected": {
+        "rmse": 1.7347040254459185,
+        "pearson_r": 0.2722438282100957,
+        "spearman_r": 0.28610239503019674,
+        "r2": -0.06076248494043113
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 2026,
+      "prediction": "predictions/b_random_ep_2026.csv",
+      "sha256": "8fd8432a5cf5cb55cf346be1f6f198f1aab92828155c7fb60c6e2e46505cc2d0",
+      "expected": {
+        "rmse": 1.709478662429943,
+        "pearson_r": 0.2964787767822744,
+        "spearman_r": 0.28150516132105274,
+        "r2": -0.030136435186042476
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 211,
+      "prediction": "predictions/b_random_ep_211.csv",
+      "sha256": "ffdb6a7a8f4304c4c5b8fdec0f91f239168be9bcfa9ce3d912382d8ad98e3fa7",
+      "expected": {
+        "rmse": 1.6056144187370016,
+        "pearson_r": 0.3818527080522937,
+        "spearman_r": 0.36309410017992616,
+        "r2": 0.09123854430622003
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 29,
+      "prediction": "predictions/b_random_ep_29.csv",
+      "sha256": "987d3d78d4dcc4a27806b73684672de1935f9575b0a5340c779e5a1f4bcfccf3",
+      "expected": {
+        "rmse": 1.8703360116313466,
+        "pearson_r": 0.19312485683664005,
+        "spearman_r": 0.19625310306841207,
+        "r2": -0.23312371839154244
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 307,
+      "prediction": "predictions/b_random_ep_307.csv",
+      "sha256": "e43d43db12da8d954906e475749c138693c1809e5bfb78bbb42a2ac010293f75",
+      "expected": {
+        "rmse": 1.8247630773877486,
+        "pearson_r": 0.2600130302976638,
+        "spearman_r": 0.24142275260745408,
+        "r2": -0.1737628206510331
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 42,
+      "prediction": "predictions/b_random_ep_42.csv",
+      "sha256": "11382de3535f8356462a8a7710a772684729fa04201aa0252948cd12ee90e105",
+      "expected": {
+        "rmse": 1.8710098021233261,
+        "pearson_r": 0.21856425905416654,
+        "spearman_r": 0.20877143849228832,
+        "r2": -0.2340123466295445
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 53,
+      "prediction": "predictions/b_random_ep_53.csv",
+      "sha256": "012e18c572523d62ba274b84ef6108ec4c41f9147b7a804affb8904e322c5a06",
+      "expected": {
+        "rmse": 1.6649860141108277,
+        "pearson_r": 0.35872365063166467,
+        "spearman_r": 0.3397600102616633,
+        "r2": 0.022788522890742846
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "random_ep",
+      "seed": 7,
+      "prediction": "predictions/b_random_ep_7.csv",
+      "sha256": "bbd0c2946c4db4a24762cc905b0399d502f7f3406ae061d72a7668e85609cecc",
+      "expected": {
+        "rmse": 1.7792801747960079,
+        "pearson_r": 0.23231330229691904,
+        "spearman_r": 0.23468229876348876,
+        "r2": -0.11597909417045704
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 101,
+      "prediction": "predictions/b_raw_qr_101.csv",
+      "sha256": "aaf1afd11fa67efffb2e70c1d7a5f4b0ae5e765d811a609d65d9682f3eb5bf34",
+      "expected": {
+        "rmse": 1.5441668896230991,
+        "pearson_r": 0.443844629434038,
+        "spearman_r": 0.4417763502808515,
+        "r2": 0.1594649048434017
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 123,
+      "prediction": "predictions/b_raw_qr_123.csv",
+      "sha256": "ac8ccbd050ea9c71ddea3c5f4a42d3e36770b8de3dcea61d8ae4cf7f10de8694",
+      "expected": {
+        "rmse": 1.5960299152920638,
+        "pearson_r": 0.3978036238769533,
+        "spearman_r": 0.39230159450582985,
+        "r2": 0.10205562532137058
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 17,
+      "prediction": "predictions/b_raw_qr_17.csv",
+      "sha256": "2950e656f01c5864cd812d2a679296ca8e3df2d37343c27dfcb155b828932006",
+      "expected": {
+        "rmse": 1.5291878564951227,
+        "pearson_r": 0.446671038244737,
+        "spearman_r": 0.4324048621818105,
+        "r2": 0.17569286201655865
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 2026,
+      "prediction": "predictions/b_raw_qr_2026.csv",
+      "sha256": "9d8e958a7d18809aed668f59abc665511b7b67d9d59b5ade532cfdadcc755474",
+      "expected": {
+        "rmse": 1.5102922056074044,
+        "pearson_r": 0.4597909792985217,
+        "spearman_r": 0.4466508704899246,
+        "r2": 0.19593836331378545
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 211,
+      "prediction": "predictions/b_raw_qr_211.csv",
+      "sha256": "d9859a7eb4805fc3211c8ecd5c25dd096cd97b6f7634f6dbc9881e5cae54339d",
+      "expected": {
+        "rmse": 1.5990883906657134,
+        "pearson_r": 0.3844767419824986,
+        "spearman_r": 0.3710886417622137,
+        "r2": 0.09861086261396435
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 29,
+      "prediction": "predictions/b_raw_qr_29.csv",
+      "sha256": "a76a060ec4a70ef9014fb399419ad3813793cb2303d871308a1bd4da9a2fe4bc",
+      "expected": {
+        "rmse": 1.616320082378028,
+        "pearson_r": 0.3998851359060873,
+        "spearman_r": 0.3953488900102014,
+        "r2": 0.07907954927235994
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 307,
+      "prediction": "predictions/b_raw_qr_307.csv",
+      "sha256": "0df077a1c63edb65d0bdf398ed5b4f16886a2e22037e2565e9c43b41ab5006a4",
+      "expected": {
+        "rmse": 1.6660449199973395,
+        "pearson_r": 0.4084771499047981,
+        "spearman_r": 0.39964257226678357,
+        "r2": 0.02154514423492948
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 42,
+      "prediction": "predictions/b_raw_qr_42.csv",
+      "sha256": "319c9badc2e8b256117862202a2d5ecd3c3b0956aeba89d989252307515a8efc",
+      "expected": {
+        "rmse": 1.564540564329508,
+        "pearson_r": 0.4243335590248376,
+        "spearman_r": 0.42006278244006695,
+        "r2": 0.137138612777838
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 53,
+      "prediction": "predictions/b_raw_qr_53.csv",
+      "sha256": "d421e17a5902ea19ebd34bdfd3387641e3f062906c40857b5c6ac56f1febc006",
+      "expected": {
+        "rmse": 1.628568950186436,
+        "pearson_r": 0.3517712509452381,
+        "spearman_r": 0.33487090407889514,
+        "r2": 0.0650687414324691
+      }
+    },
+    {
+      "panel": "b",
+      "arm": "raw_qr",
+      "seed": 7,
+      "prediction": "predictions/b_raw_qr_7.csv",
+      "sha256": "c0434a04184a8525fc82f6f5f538cd5594e9c6ad486f925b715e8be865f35507",
+      "expected": {
+        "rmse": 1.584262378522841,
+        "pearson_r": 0.39243201180060494,
+        "spearman_r": 0.38734613744272184,
+        "r2": 0.11524790896340587
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "baseline",
+      "seed": 42,
+      "prediction": "predictions/a_baseline_42.csv",
+      "sha256": "a0eda48fc71c546237247b4f469f8ff5901bc94aaa22538296841644fe260b94",
+      "expected": {
+        "rmse": 1.4746664789171553,
+        "pearson_r": 0.49450404738369613,
+        "spearman_r": 0.4748975265486469,
+        "r2": 0.23342440287918675
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep5",
+      "seed": 42,
+      "prediction": "predictions/a_ep5_42.csv",
+      "sha256": "af56ff0035ebdb607d9ffe61a1b4e95f25364891c27bb4ed26192396bed82832",
+      "expected": {
+        "rmse": 1.5091333185407756,
+        "pearson_r": 0.470610295633291,
+        "spearman_r": 0.4479985940593799,
+        "r2": 0.1971718564937327
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep20",
+      "seed": 42,
+      "prediction": "predictions/a_ep20_42.csv",
+      "sha256": "82a593e8f5b027b58aaa1fe6e681969e99e23fbe42180514babc9e5823f08a94",
+      "expected": {
+        "rmse": 1.5662841489877075,
+        "pearson_r": 0.446747300261563,
+        "spearman_r": 0.42999180153363165,
+        "r2": 0.1352143408038855
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "baseline",
+      "seed": 123,
+      "prediction": "predictions/a_baseline_123.csv",
+      "sha256": "673ee99d6c3a2d7e3dcda5c81d947a709b67f4b80df110c99e2c30fee034d849",
+      "expected": {
+        "rmse": 1.5084573350189536,
+        "pearson_r": 0.47117014603117047,
+        "spearman_r": 0.4629055611754914,
+        "r2": 0.1978909143054839
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep5",
+      "seed": 123,
+      "prediction": "predictions/a_ep5_123.csv",
+      "sha256": "4db64950e8ecbb7b54c15c479db2bbdfb26d20d4de8ac64b4ae47d45f77cebda",
+      "expected": {
+        "rmse": 1.4587301836840505,
+        "pearson_r": 0.5302795308520314,
+        "spearman_r": 0.5171761443015044,
+        "r2": 0.249903201017591
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep20",
+      "seed": 123,
+      "prediction": "predictions/a_ep20_123.csv",
+      "sha256": "47eb5f0d56759e14aee2e3cb34f50df2505fecc3d799c782e1e0d3c2795075be",
+      "expected": {
+        "rmse": 1.6022628677938957,
+        "pearson_r": 0.4013938744052376,
+        "spearman_r": 0.37390373468534976,
+        "r2": 0.09502848483072546
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "baseline",
+      "seed": 7,
+      "prediction": "predictions/a_baseline_7.csv",
+      "sha256": "20bd311f16d046d22b1d4b70a2764f4e44b879caaf151d29983dfde3f9d46377",
+      "expected": {
+        "rmse": 1.750915379218233,
+        "pearson_r": 0.169043551586985,
+        "spearman_r": 0.19294744202998843,
+        "r2": -0.08068142842461046
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep5",
+      "seed": 7,
+      "prediction": "predictions/a_ep5_7.csv",
+      "sha256": "b7005d5b8259dbfa3292a4081a0a5a3298d9c6230d520c0ec687573faf2ee534",
+      "expected": {
+        "rmse": 1.487010047756252,
+        "pearson_r": 0.5162268723983505,
+        "spearman_r": 0.504064373947855,
+        "r2": 0.2205375835423279
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep20",
+      "seed": 7,
+      "prediction": "predictions/a_ep20_7.csv",
+      "sha256": "904a2629ff2b58f1bf87ee6bf4bcfde9e61072efa84b4e31197fdfde4c7e423c",
+      "expected": {
+        "rmse": 1.6194041934207482,
+        "pearson_r": 0.4051249916638886,
+        "spearman_r": 0.4031446339510095,
+        "r2": 0.07556178037977013
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "baseline",
+      "seed": 2026,
+      "prediction": "predictions/a_baseline_2026.csv",
+      "sha256": "1114211e2c204c5f9c9882cbb514c678d78fb97fc4f3c124814c88a1da65d255",
+      "expected": {
+        "rmse": 1.5479910243716006,
+        "pearson_r": 0.4153103708232497,
+        "spearman_r": 0.4230414320682376,
+        "r2": 0.15529658528699852
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep5",
+      "seed": 2026,
+      "prediction": "predictions/a_ep5_2026.csv",
+      "sha256": "39b0d9d7eea6b0acd303f823e218ef450fc37ad79400e310e91acd9cf693eeed",
+      "expected": {
+        "rmse": 1.500868035701909,
+        "pearson_r": 0.5014283181371368,
+        "spearman_r": 0.4751040251762381,
+        "r2": 0.20594169879856628
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep20",
+      "seed": 2026,
+      "prediction": "predictions/a_ep20_2026.csv",
+      "sha256": "5713a5fa3048406111a19a547bd724a12b355f5a2058d68557de1a6dccf2ca5c",
+      "expected": {
+        "rmse": 1.5184993690577115,
+        "pearson_r": 0.46689687059970386,
+        "spearman_r": 0.4360928695306938,
+        "r2": 0.18717583791380732
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "baseline",
+      "seed": 17,
+      "prediction": "predictions/a_baseline_17.csv",
+      "sha256": "5407af786ea53e6bf8458bffa3ababd69ddc606f7676050e5becf3db5fe0e1db",
+      "expected": {
+        "rmse": 1.5763351085367003,
+        "pearson_r": 0.3887891464128996,
+        "spearman_r": 0.3717515385667161,
+        "r2": 0.1240799447301214
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep5",
+      "seed": 17,
+      "prediction": "predictions/a_ep5_17.csv",
+      "sha256": "febe8832eb4ca592fa6b773d317290836089b1ea6193f811c61985dee5345c29",
+      "expected": {
+        "rmse": 1.4881063136266655,
+        "pearson_r": 0.5086690452180529,
+        "spearman_r": 0.49347679304197,
+        "r2": 0.2193878764158872
+      }
+    },
+    {
+      "panel": "a",
+      "arm": "ep20",
+      "seed": 17,
+      "prediction": "predictions/a_ep20_17.csv",
+      "sha256": "306fd0b5592cb86b152f0592b2f1ee10f4a52e9b0c62bc8438d3ddf45fb5e3e4",
+      "expected": {
+        "rmse": 1.6064446667610643,
+        "pearson_r": 0.43108019462652525,
+        "spearman_r": 0.39701342500830483,
+        "r2": 0.09029849008292967
+      }
+    },
+    {
+      "panel": "c",
+      "arm": "ep5",
+      "seed": null,
+      "prediction": "predictions/c_ep5.csv",
+      "sha256": "e5f87b8854b7eb8bcb65bb56fc6157d96fc579e180576d495d3d1526944470f6",
+      "expected": {
+        "rmse": 1.5311361454074368,
+        "pearson_r": 0.4203310263684146,
+        "spearman_r": 0.4037841727976367,
+        "r2": 0.1735910777008005
+      },
+      "alpha": 100.0,
+      "validation_search": [
+        {
+          "alpha": 0.01,
+          "val_mse": 4.132503639391398
+        },
+        {
+          "alpha": 0.1,
+          "val_mse": 4.035650283822084
+        },
+        {
+          "alpha": 1.0,
+          "val_mse": 3.7716679860629005
+        },
+        {
+          "alpha": 10.0,
+          "val_mse": 3.5519782382885303
+        },
+        {
+          "alpha": 100.0,
+          "val_mse": 3.5502762254086924
+        },
+        {
+          "alpha": 1000.0,
+          "val_mse": 3.6636294607428272
+        },
+        {
+          "alpha": 10000.0,
+          "val_mse": 3.861325981241667
+        }
+      ]
+    },
+    {
+      "panel": "c",
+      "arm": "ep20",
+      "seed": null,
+      "prediction": "predictions/c_ep20.csv",
+      "sha256": "ac5c8bf700acd4751949ed937661a39a5d691a53e0367f9c7bf1948fef3e2602",
+      "expected": {
+        "rmse": 1.674510950946778,
+        "pearson_r": 0.3096022990882071,
+        "spearman_r": 0.27205707136015905,
+        "r2": 0.01157581425905696
+      },
+      "alpha": 0.1,
+      "validation_search": [
+        {
+          "alpha": 0.01,
+          "val_mse": 3.5782635762284163
+        },
+        {
+          "alpha": 0.1,
+          "val_mse": 3.560726199268825
+        },
+        {
+          "alpha": 1.0,
+          "val_mse": 3.6145286607825327
+        },
+        {
+          "alpha": 10.0,
+          "val_mse": 3.7766953581820237
+        },
+        {
+          "alpha": 100.0,
+          "val_mse": 3.768218664632779
+        },
+        {
+          "alpha": 1000.0,
+          "val_mse": 3.6137323106298065
+        },
+        {
+          "alpha": 10000.0,
+          "val_mse": 3.704236411339688
+        }
+      ]
+    }
+  ],
+  "note": "Historical paper evidence, separate from newly trained release runs."
+}

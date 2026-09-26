@@ -1,0 +1,2 @@
+# Historical CSV bytes (including CRLF) are checksummed evidence.
+benchmarks/atom3d_lba/reference/predictions/*.csv -text whitespace=cr-at-eol

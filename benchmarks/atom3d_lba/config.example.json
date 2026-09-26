@@ -1,0 +1,16 @@
+{
+  "estats_root": "../../../Estats",
+  "gvp_root": "../..",
+  "lmdb_root": "/path/to/LBA/split-by-sequence-identity-30/data",
+  "ep5_checkpoint": "/path/to/V9_5_epoch_dpss.pt",
+  "ep20_checkpoint": "/path/to/V9_20_epoch_dpss.pt",
+  "output_root": "/path/to/new/lba-paper-run",
+  "estats_python": "/path/to/envs/estats/bin/python",
+  "gvp_python": "/path/to/envs/gvp/bin/python",
+  "scheduler": {
+    "cpu_partition": "dept_cpu", "gpu_partition": "koes_gpu,dept_gpu",
+    "exclude": "g021", "controlled_constraint": "L40", "cpus": 4,
+    "memory": "32G", "cpu_time": "12:00:00", "gpu_time": "12:00:00",
+    "max_parallel": 2, "pqr_shards": 32
+  }
+}
